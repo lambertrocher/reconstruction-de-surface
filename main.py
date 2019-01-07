@@ -1,5 +1,6 @@
+from mpl_toolkits.mplot3d import Axes3D
 import numpy
-
+import matplotlib.pyplot as plt
 
 def read_off(file):
     if 'OFF' != file.readline().strip():
@@ -34,9 +35,16 @@ def init_voxels_grid(vertices):
     y_range = y_max - y_min
     z_range = z_max - z_min
 
+    print("x range", x_range)
+    print("y range", y_range)
+    print("z range", z_range)
+
     for vertex in vertices:
-        grid[int((vertex[0] - x_min) / x_range * dim_x) - 1][int((vertex[1] - y_min) / y_range * dim_y) - 1][
-            int((vertex[2] - z_min) / z_range * dim_z) - 1] = 1
+        x = int((vertex[0] - x_min) / x_range * (dim_x-1))
+        y = int((vertex[1] - y_min) / y_range * (dim_x-1))
+        z = int((vertex[2] - z_min) / z_range * (dim_x-1))
+        # print("x, y, z", x, y, z)
+        grid[x][y][z] = 1
 
     print("grille de voxels", grid)
     return grid
@@ -58,13 +66,27 @@ def init_distances_grid(voxels_grid):
     return distance_grid
 
 
-off_file = open("dragon.OFF", "r")
+off_file = open("mushroom.off", "r")
 vertices = read_off(off_file)
 
 
-dim_x = 4
-dim_y = 4
-dim_z = 4
+dim_x = 50
+dim_y = 50
+dim_z = 50
 
 voxels_grid = init_voxels_grid(vertices)
-init_distances_grid(voxels_grid)
+# distances_grid = init_distances_grid(voxels_grid)
+
+N1 = 4
+N2 = 4
+N3 = 4
+ma = numpy.random.choice([0,1], size=(N1,N2,N3), p=[0.90, 0.10])
+print("test", ma)
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.set_aspect('equal')
+
+ax.voxels(voxels_grid, edgecolor="k")
+
+plt.show()
