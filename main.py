@@ -187,9 +187,42 @@ def get_v_ext(filled_voxels_grid):
     return v_ext
 
 
-dim_x = 20
-dim_y = 20
-dim_z = 20
+def get_v_int(filled_voxels_grid):
+    v_int = numpy.zeros(filled_voxels_grid.shape)
+    for x in range(filled_voxels_grid.shape[0]):
+        for y in range(filled_voxels_grid.shape[1]):
+            for z in range(filled_voxels_grid.shape[2]):
+                interior = False
+                if filled_voxels_grid[x][y][z] == 0:
+                    if x + 1 < dim_x:
+                        if filled_voxels_grid[x + 1][y][z] == 1:
+                            interior = True
+                    if x - 1 >= 0:
+                        if filled_voxels_grid[x - 1][y][z] == 1:
+                            interior = True
+                    if y + 1 < dim_y:
+                        if filled_voxels_grid[x][y + 1][z] == 1:
+                            interior = True
+                    if y - 1 >= 0:
+                        if filled_voxels_grid[x][y - 1][z] == 1:
+                            interior = True
+                    if z + 1 < dim_z:
+                        if filled_voxels_grid[x][y][z + 1] == 1:
+                            interior = True
+                    if z - 1 >= 0:
+                        if filled_voxels_grid[x][y][z - 1] == 1:
+                            interior = True
+                    if interior:
+                        print("dans int", x, y, z)
+                        v_int[x][y][z] = 1
+                    else:
+                        print("crust mais pas int", x,y, z)
+    return v_int
+
+
+dim_x = 30
+dim_y = 30
+dim_z = 30
 
 
 def main():
@@ -212,6 +245,9 @@ def main():
 
     # ax.voxels(filled_voxels_grid[:][:][0:8], facecolors=color_voxels_grid(filled_voxels_grid)[:][:][0:8], edgecolor="k")
 
+    v_int = get_v_int(filled_voxels_grid)
+    print("v_int", v_int[:][:][15])
+
     for x in range(filled_voxels_grid.shape[0]):
         for y in range(filled_voxels_grid.shape[1]):
             for z in range(filled_voxels_grid.shape[2]):
@@ -222,13 +258,13 @@ def main():
                 elif filled_voxels_grid[x][y][z] == 0:
                     filled_voxels_grid[x][y][z] = 10
 
-    v_ext = get_v_ext(filled_voxels_grid)
-    print("v_ext", v_ext)
+    # v_ext = get_v_ext(filled_voxels_grid)
+    # print("v_ext", v_ext)
 
     colors = color_voxels_grid(filled_voxels_grid[:][:][:])
     print(colors)
     # ax.voxels(filled_voxels_grid[:][:][:], facecolors=colors)
-    ax.voxels(v_ext, edgecolor="k")
+    ax.voxels(v_int, edgecolor="k")
 
     plt.show()
 
