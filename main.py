@@ -220,9 +220,9 @@ def get_v_int(filled_voxels_grid):
     return v_int
 
 
-dim_x = 30
-dim_y = 30
-dim_z = 30
+dim_x = 40
+dim_y = 40
+dim_z = 40
 
 
 def main():
@@ -239,14 +239,15 @@ def main():
 
     filled_voxels_grid = flood_fill(voxels_grid, 0, 0, 0, 0, 2)
 
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.set_aspect('equal')
+
 
     # ax.voxels(filled_voxels_grid[:][:][0:8], facecolors=color_voxels_grid(filled_voxels_grid)[:][:][0:8], edgecolor="k")
 
     v_int = get_v_int(filled_voxels_grid)
     print("v_int", v_int[:][:][15])
+
+    v_ext = get_v_ext(filled_voxels_grid)
+    print("v_ext", v_ext)
 
     for x in range(filled_voxels_grid.shape[0]):
         for y in range(filled_voxels_grid.shape[1]):
@@ -263,8 +264,20 @@ def main():
 
     colors = color_voxels_grid(filled_voxels_grid[:][:][:])
     print(colors)
-    # ax.voxels(filled_voxels_grid[:][:][:], facecolors=colors)
-    ax.voxels(v_int, edgecolor="k")
+
+    # fig = plt.figure()
+    # ax = fig.gca(projection='3d')
+    # ax.set_aspect('equal')
+    # # ax.voxels(filled_voxels_grid[:][:][:], facecolors=colors)
+    # ax.voxels(v_ext, edgecolor="k")
+    # plt.show()
+
+    # plt.ion()
+
+
+    plt.figure(1)
+    plt.imshow(v_ext[:][:][28], cmap='gray', interpolation='none')
+
 
     plt.show()
 
