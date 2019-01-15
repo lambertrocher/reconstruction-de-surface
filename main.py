@@ -1,6 +1,8 @@
 from mpl_toolkits.mplot3d import Axes3D
 import numpy
 import matplotlib.pyplot as plt
+import sys
+
 
 def read_off(file):
     if 'OFF' != file.readline().strip():
@@ -11,6 +13,7 @@ def read_off(file):
     print("nombre de points : ", n_vertices)
     print(vertices)
     return vertices
+
 
 def init_voxels_grid(vertices):
     grid = numpy.zeros((dim_x, dim_y, dim_z))
@@ -46,12 +49,12 @@ def init_voxels_grid(vertices):
         # print("x, y, z", x, y, z)
         grid[x][y][z] = 1
 
-    print("grille de voxels", grid)
+    #print("grille de voxels", grid)
     return grid
 
 
 def init_distances_grid(voxels_grid):
-    distance_grid = voxels_grid
+    distance_grid = voxels_grid.copy()
 
     x, y, z = [0]*3
     for x in range(dim_x):
@@ -61,32 +64,175 @@ def init_distances_grid(voxels_grid):
                     distance_grid[x][y][z] = 0
                 else:
                     distance_grid[x][y][z] = 1
-    print("grille des distances", distance_grid)
+    #print("grille des distances", distance_grid)
 
     return distance_grid
 
 
-off_file = open("mushroom.off", "r")
-vertices = read_off(off_file)
+def dilate_voxels_grid(voxels_grid):
+    dilated_grid = voxels_grid.copy()
+    for x in range(dim_x):
+        for y in range(dim_y):
+            for z in range(dim_z):
+                if voxels_grid[x][y][z] == 1:
+                    if x+1 < dim_x:
+                        dilated_grid[x+1][y][z] = 1
+                    if x-1 >= 0:
+                        dilated_grid[x-1][y][z] = 1
+                    if y + 1 < dim_y:
+                        dilated_grid[x][y+1][z] = 1
+                    if y - 1 >= 0:
+                        dilated_grid[x][y-1][z] = 1
+                    if z + 1 < dim_z:
+                        dilated_grid[x][y][z+1] = 1
+                    if z - 1 >= 0:
+                        dilated_grid[x][y][z-1] = 1
+    return dilated_grid
 
 
-dim_x = 50
-dim_y = 50
-dim_z = 50
+def flood_fill(voxels_grid, x, y, z, col_cible, col_rep):
+    filled_grid = voxels_grid.copy()
+    pile = []
+    if voxels_grid[x][y][z] != col_cible:
+        return
+    else:
+        pile.append([x,y,z])
+        while pile:
+            n = pile.pop()
 
-voxels_grid = init_voxels_grid(vertices)
-# distances_grid = init_distances_grid(voxels_grid)
+            x = n[0]
+            y = n[1]
+            z = n[2]
 
-N1 = 4
-N2 = 4
-N3 = 4
-ma = numpy.random.choice([0,1], size=(N1,N2,N3), p=[0.90, 0.10])
-print("test", ma)
+            filled_grid[x][y][z] = col_rep
 
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-ax.set_aspect('equal')
+            if x + 1 < dim_x:
+                if filled_grid[x+1][y][z] == col_cible:
+                    pile.append([x+1,y,z])
+            if x - 1 >= 0:
+                if filled_grid[x-1][y][z] == col_cible:
+                    pile.append([x-1,y,z])
+            if y + 1 < dim_y:
+                if filled_grid[x][y+1][z] == col_cible:
+                    pile.append([x,y+1,z])
+            if y - 1 >= 0:
+                if filled_grid[x][y-1][z] == col_cible:
+                    pile.append([x,y-1,z])
+            if z + 1 < dim_z:
+                if filled_grid[x][y][z+1] == col_cible:
+                    pile.append([x,y,z+1])
+            if z - 1 >= 0:
+                if filled_grid[x][y][z-1] == col_cible:
+                    pile.append([x,y,z-1])
+        print("filled_grid", filled_grid)
+    return filled_grid
 
-ax.voxels(voxels_grid, edgecolor="k")
 
-plt.show()
+def color_voxels_grid(filled_voxels_grid):
+    colors = numpy.empty(filled_voxels_grid.shape, dtype=object)
+    for x in range(filled_voxels_grid.shape[0]):
+        for y in range(filled_voxels_grid.shape[1]):
+            for z in range(filled_voxels_grid.shape[2]):
+                if filled_voxels_grid[x][y][z] == 2:
+                    colors[x][y][z] = "green"
+                if filled_voxels_grid[x][y][z] == 1:
+                    colors[x][y][z] = "yellow"
+                if filled_voxels_grid[x][y][z] == 0:
+                    colors[x][y][z] = "blue"
+                    print("blue", x, y, z)
+    return colors
+
+
+def get_v_ext(filled_voxels_grid):
+    v_ext = numpy.zeros(filled_voxels_grid.shape)
+    for x in range(filled_voxels_grid.shape[0]):
+        for y in range(filled_voxels_grid.shape[1]):
+            for z in range(filled_voxels_grid.shape[2]):
+                ext = False
+                if filled_voxels_grid[x][y][z] == 1:
+                    if x + 1 < dim_x:
+                        if filled_voxels_grid[x + 1][y][z] == 2:
+                            ext = True
+                    else:
+                        ext = True
+                    if x - 1 >= 0:
+                        if filled_voxels_grid[x - 1][y][z] == 2:
+                            ext = True
+                    else:
+                        ext = True
+                    if y + 1 < dim_y:
+                        if filled_voxels_grid[x][y + 1][z] == 2:
+                            ext = True
+                    else:
+                        ext = True
+                    if y - 1 >= 0:
+                        if filled_voxels_grid[x][y - 1][z] == 2:
+                            ext = True
+                    else:
+                        ext = True
+                    if z + 1 < dim_z:
+                        if filled_voxels_grid[x][y][z + 1] == 2:
+                            ext = True
+                    else:
+                        ext = True
+                    if z - 1 >= 0:
+                        if filled_voxels_grid[x][y][z - 1] == 2:
+                            ext = True
+                    else:
+                        ext = True
+                    if ext:
+                        v_ext[x][y][z] = 1
+                    else:
+                        print("crust mais pas ext", x,y, z)
+    return v_ext
+
+
+dim_x = 20
+dim_y = 20
+dim_z = 20
+
+
+def main():
+    off_file = open("dragon.OFF", "r")
+    vertices = read_off(off_file)
+
+    voxels_grid = init_voxels_grid(vertices)
+    distances_grid = init_distances_grid(voxels_grid)
+
+    # voxels_grid = dilate_voxels_grid(voxels_grid)
+    # voxels_grid = dilate_voxels_grid(voxels_grid)
+    # voxels_grid = dilate_voxels_grid(voxels_grid)
+    # voxels_grid = dilate_voxels_grid(voxels_grid)
+
+    filled_voxels_grid = flood_fill(voxels_grid, 0, 0, 0, 0, 2)
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.set_aspect('equal')
+
+    # ax.voxels(filled_voxels_grid[:][:][0:8], facecolors=color_voxels_grid(filled_voxels_grid)[:][:][0:8], edgecolor="k")
+
+    for x in range(filled_voxels_grid.shape[0]):
+        for y in range(filled_voxels_grid.shape[1]):
+            for z in range(filled_voxels_grid.shape[2]):
+                if filled_voxels_grid[x][y][z] == 2:
+                    filled_voxels_grid[x][y][z] = 2
+                elif filled_voxels_grid[x][y][z] == 1:
+                    filled_voxels_grid[x][y][z] = 1
+                elif filled_voxels_grid[x][y][z] == 0:
+                    filled_voxels_grid[x][y][z] = 10
+
+    v_ext = get_v_ext(filled_voxels_grid)
+    print("v_ext", v_ext)
+
+    colors = color_voxels_grid(filled_voxels_grid[:][:][:])
+    print(colors)
+    # ax.voxels(filled_voxels_grid[:][:][:], facecolors=colors)
+    ax.voxels(v_ext, edgecolor="k")
+
+    plt.show()
+
+
+main()
+
+
