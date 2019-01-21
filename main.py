@@ -79,7 +79,6 @@ class Graph:
 
             # print("flow max", max_flow)
 
-
             # update residual capacities of the edges and reverse edges
             # along the path
             v = sink
@@ -89,9 +88,7 @@ class Graph:
                 self.graph[v][u] += path_flow
                 v = parent[v]
 
-
         print("terminé")
-
 
         # print the edges which initially had weights
         # but now have 0 weight
@@ -99,7 +96,7 @@ class Graph:
             for j in range(self.COL):
                 if self.graph[i][j] == 0 and self.org_graph[i][j] > 0:
                     # print(str(i) + " - " + str(j))
-                    cut_edges += [(i,j)]
+                    cut_edges += [(i, j)]
 
                 # Create a graph given in the above diagram
         return cut_edges
@@ -144,20 +141,20 @@ def init_voxels_grid(vertices):
     print("z range", z_range)
 
     for vertex in vertices:
-        x = int((vertex[0] - x_min) / x_range * (dim_x-1))
-        y = int((vertex[1] - y_min) / y_range * (dim_x-1))
-        z = int((vertex[2] - z_min) / z_range * (dim_x-1))
+        x = int((vertex[0] - x_min) / x_range * (dim_x - 1))
+        y = int((vertex[1] - y_min) / y_range * (dim_x - 1))
+        z = int((vertex[2] - z_min) / z_range * (dim_x - 1))
         # print("x, y, z", x, y, z)
         grid[x][y][z] = 1
 
-    #print("grille de voxels", grid)
+    # print("grille de voxels", grid)
     return grid
 
 
 def get_distances_grid(voxels_grid, v_crust):
     distance_grid = voxels_grid.copy()
 
-    x, y, z = [0]*3
+    x, y, z = [0] * 3
     for x in range(dim_x):
         for y in range(dim_y):
             for z in range(dim_z):
@@ -165,7 +162,7 @@ def get_distances_grid(voxels_grid, v_crust):
                     distance_grid[x][y][z] = 0
                 else:
                     distance_grid[x][y][z] = 1
-    #print("grille des distances", distance_grid)
+    # print("grille des distances", distance_grid)
 
     for x in range(voxels_grid.shape[0]):
         for y in range(voxels_grid.shape[1]):
@@ -181,18 +178,18 @@ def dilate_voxels_grid(voxels_grid):
         for y in range(dim_y):
             for z in range(dim_z):
                 if voxels_grid[x][y][z] == 1:
-                    if x+1 < dim_x:
-                        dilated_grid[x+1][y][z] = 1
-                    if x-1 >= 0:
-                        dilated_grid[x-1][y][z] = 1
+                    if x + 1 < dim_x:
+                        dilated_grid[x + 1][y][z] = 1
+                    if x - 1 >= 0:
+                        dilated_grid[x - 1][y][z] = 1
                     if y + 1 < dim_y:
-                        dilated_grid[x][y+1][z] = 1
+                        dilated_grid[x][y + 1][z] = 1
                     if y - 1 >= 0:
-                        dilated_grid[x][y-1][z] = 1
+                        dilated_grid[x][y - 1][z] = 1
                     if z + 1 < dim_z:
-                        dilated_grid[x][y][z+1] = 1
+                        dilated_grid[x][y][z + 1] = 1
                     if z - 1 >= 0:
-                        dilated_grid[x][y][z-1] = 1
+                        dilated_grid[x][y][z - 1] = 1
     return dilated_grid
 
 
@@ -202,7 +199,7 @@ def flood_fill(voxels_grid, x, y, z, col_cible, col_rep):
     if voxels_grid[x][y][z] != col_cible:
         return
     else:
-        pile.append([x,y,z])
+        pile.append([x, y, z])
         while pile:
             n = pile.pop()
 
@@ -213,24 +210,24 @@ def flood_fill(voxels_grid, x, y, z, col_cible, col_rep):
             filled_grid[x][y][z] = col_rep
 
             if x + 1 < dim_x:
-                if filled_grid[x+1][y][z] == col_cible:
-                    pile.append([x+1,y,z])
+                if filled_grid[x + 1][y][z] == col_cible:
+                    pile.append([x + 1, y, z])
             if x - 1 >= 0:
-                if filled_grid[x-1][y][z] == col_cible:
-                    pile.append([x-1,y,z])
+                if filled_grid[x - 1][y][z] == col_cible:
+                    pile.append([x - 1, y, z])
             if y + 1 < dim_y:
-                if filled_grid[x][y+1][z] == col_cible:
-                    pile.append([x,y+1,z])
+                if filled_grid[x][y + 1][z] == col_cible:
+                    pile.append([x, y + 1, z])
             if y - 1 >= 0:
-                if filled_grid[x][y-1][z] == col_cible:
-                    pile.append([x,y-1,z])
+                if filled_grid[x][y - 1][z] == col_cible:
+                    pile.append([x, y - 1, z])
             if z + 1 < dim_z:
-                if filled_grid[x][y][z+1] == col_cible:
-                    pile.append([x,y,z+1])
+                if filled_grid[x][y][z + 1] == col_cible:
+                    pile.append([x, y, z + 1])
             if z - 1 >= 0:
-                if filled_grid[x][y][z-1] == col_cible:
-                    pile.append([x,y,z-1])
-        #print("filled_grid", filled_grid)
+                if filled_grid[x][y][z - 1] == col_cible:
+                    pile.append([x, y, z - 1])
+        # print("filled_grid", filled_grid)
     return filled_grid
 
 
@@ -328,29 +325,99 @@ def get_v_int(filled_voxels_grid):
     return v_int
 
 
-def construct_mesh(s_opt):
-    for x in range(s_opt.shape[0]-1):
-        for y in range(s_opt.shape[1]-1):
-            for z in range(s_opt.shape[2]-1):
-                n_voxels_in_s_opt = s_opt[x][y][z][0] + s_opt[x+1][y][z][0] + s_opt[x][y+1][z][0] + s_opt[x+1][y+1][z][0] + s_opt[x][y][z+1][0] + s_opt[x+1][y][z+1][0] + s_opt[x][y+1][z+1][0] + s_opt[x+1][y+1][z+1][0]
+def offset_cut_edges(cut_edges, offset):
+    cut_edges = cut_edges.copy()
+
+    res = []
+    for cut_edge in cut_edges:
+        cut_edge = list(cut_edge)
+        cut_edge[0] = list(cut_edge[0])
+        cut_edge[1] = list(cut_edge[1])
+
+        print(cut_edge)
+        # cut_edge[0][0] = cut_edge[0][0] + offset[0]
+        # cut_edge[0][1] = cut_edge[0][1] + offset[1]
+        # cut_edge[0][2] = cut_edge[0][2] + offset[2]
+        #
+        # cut_edge[1][0] = cut_edge[1][0] + offset[0]
+        # cut_edge[1][1] = cut_edge[1][1] + offset[1]
+        # cut_edge[1][2] = cut_edge[1][2] + offset[2]
+
+        res.append((((cut_edge[0][0] + offset[0]),(cut_edge[0][1] + offset[1]),(cut_edge[0][2] + offset[2])),((cut_edge[1][0] + offset[0]),(cut_edge[1][1] + offset[1]),(cut_edge[1][2] + offset[2]))))
+
+    return res
+
+
+def construct_mesh(cut_edges):
+
+    s_opt = numpy.zeros((dim_x, dim_y, dim_z))
+
+    for voxel in cut_edges.keys():
+        s_opt[voxel[0]][voxel[1]][voxel[2]] = 1
+    print("s_opt", s_opt)
+
+    for x in range(dim_x - 1):
+        for y in range(dim_y - 1):
+            for z in range(dim_z - 1):
+
+                n_voxels_in_s_opt = s_opt[x][y][z] + s_opt[x + 1][y][z] + s_opt[x][y + 1][z] + \
+                                    s_opt[x + 1][y + 1][z] + s_opt[x][y][z + 1] + s_opt[x + 1][y][z + 1] + \
+                                    s_opt[x][y + 1][z + 1] + s_opt[x + 1][y + 1][z + 1]
                 if n_voxels_in_s_opt >= 3:
-                    v = []
-                    if s_opt[x][y][z][0] == 1:
-                        v = [x, y, z]
-                    elif s_opt[x+1][y][z][0] == 1:
-                        v = [x+1, y, z]
-                    elif s_opt[x][y+1][z][0] == 1:
-                        v = [x, y+1, z]
-                    elif s_opt[x+1][y+1][z][0] == 1:
-                        v = [x+1, y+1, z]
-                    elif s_opt[x][y][z+1][0] == 1:
-                        v = [x, y, z+1]
-                    elif s_opt[x+1][y][z+1][0] == 1:
-                        v = [x+1, y, z+1]
-                    elif s_opt[x][y+1][z+1][0] == 1:
-                        v = [x, y+1, z+1]
-                    elif s_opt[x+1][y+1][z+1][0] == 1:
-                        v = [x+1, y+1, z+1]
+                    b_cut_edges = {}
+
+                    if (x,y,z) in cut_edges.keys():
+                        b_cut_edges[(0,0,0)] = offset_cut_edges(cut_edges[(x, y, z)],[0,0,0])
+                    if (x+1, y, z) in cut_edges.keys():
+                        b_cut_edges[(1, 0, 0)] = offset_cut_edges(cut_edges[(x+1, y, z)],[1,0,0])
+                    if (x, y+1, z) in cut_edges.keys():
+                        b_cut_edges[(0, 1, 0)] = offset_cut_edges(cut_edges[(x, y+1, z)],[0,1,0])
+                    if (x+1, y+1, z) in cut_edges.keys():
+                        b_cut_edges[(1, 1, 0)] = offset_cut_edges(cut_edges[(x+1, y+1, z)],[1,1,0])
+                    if (x, y, z+1) in cut_edges.keys():
+                        b_cut_edges[(0, 0, 1)] = offset_cut_edges(cut_edges[(x, y, z+1)],[0,0,1])
+                    if (x+1, y, z+1) in cut_edges.keys():
+                        b_cut_edges[(1, 0, 1)] = offset_cut_edges(cut_edges[(x+1, y, z+1)],[1,0,1])
+                    if (x, y+1, z+1) in cut_edges.keys():
+                        b_cut_edges[(0, 1, 1)] = offset_cut_edges(cut_edges[(x, y+1, z+1)],[0,1,1])
+                    if (x+1, y+1, z+1) in cut_edges.keys():
+                        b_cut_edges[(1, 1, 1)] = offset_cut_edges(cut_edges[(x+1, y+1, z+1)],[1,1,1])
+
+                    vertex = []
+                    if s_opt[x][y][z] == 1:
+                        vertex.append((x, y, z))
+                    elif s_opt[x + 1][y][z] == 1:
+                        vertex.append((x + 1, y, z))
+                    elif s_opt[x][y + 1][z] == 1:
+                        vertex.append((x, y + 1, z))
+                    elif s_opt[x + 1][y + 1][z] == 1:
+                        vertex.append((x + 1, y + 1, z))
+                    elif s_opt[x][y][z + 1] == 1:
+                        vertex.append((x, y, z + 1))
+                    elif s_opt[x + 1][y][z + 1] == 1:
+                        vertex.append((x + 1, y, z + 1))
+                    elif s_opt[x][y + 1][z + 1] == 1:
+                        vertex.append((x, y + 1, z + 1))
+                    elif s_opt[x + 1][y + 1][z + 1] == 1:
+                        vertex.append((x + 1, y + 1, z + 1))
+
+                    # print(b_cut_edges)
+
+                    # e = None
+                    #
+                    # for cut_edge in b_cut_edges[(v[0], v[1], v[2])]:
+                    #     if cut_edge[0] == (1,1,1) or cut_edge[1] == (1,1,1):
+                    #         e = cut_edge
+                    # print("e", e)
+                    # first_e = e
+                    #
+                    # while True:
+                    #     f = None
+                    #     for cut_edge in b_cut_edges[(v[0], v[1], v[2])]:
+                    #         if cut_edge[0] == (1, 1, 1) or cut_edge[1] == (1, 1, 1) and cut_edge != e:
+                    #             f = cut_edge
+                    #     print("f", f)
+
 
 def find_weight(sommet1, sommet2, distances_grid):
     if (sommet1 == "sink") or (sommet1 == "source") or (sommet2 == "sink") or (sommet2 == "source"):
@@ -361,14 +428,13 @@ def find_weight(sommet1, sommet2, distances_grid):
     voxel_x = max(math.floor(x), math.floor(x2))
     voxel_y = max(math.floor(y), math.floor(y2))
     voxel_z = max(math.floor(z), math.floor(z2))
-    return 0.00001 + (distances_grid[voxel_x][voxel_y][voxel_z])**4
+    return 0.00001 + (distances_grid[voxel_x][voxel_y][voxel_z]) ** 4
+
 
 def construct_graph(v_crust, distances_grid, v_int, v_ext):
-
     vertices_and_edges = {}
     vertices_and_edges["source"] = []
     vertices_and_edges["sink"] = []
-
 
     a = .00001
     s = 4
@@ -378,9 +444,11 @@ def construct_graph(v_crust, distances_grid, v_int, v_ext):
             for z in range(v_crust.shape[2]):
                 if v_crust[x][y][z] == 1:
                     if (x - 0.5, y, z) in vertices_and_edges.keys():
-                        vertices_and_edges[(x - 0.5, y, z)] += [(x, y, z + 0.5), (x, y, z - 0.5), (x, y + 0.5, z), (x, y - 0.5, z)]
+                        vertices_and_edges[(x - 0.5, y, z)] += [(x, y, z + 0.5), (x, y, z - 0.5), (x, y + 0.5, z),
+                                                                (x, y - 0.5, z)]
                     else:
-                        vertices_and_edges[(x - 0.5, y, z)] = [(x, y, z + 0.5), (x, y, z - 0.5), (x, y + 0.5, z), (x, y - 0.5, z)]
+                        vertices_and_edges[(x - 0.5, y, z)] = [(x, y, z + 0.5), (x, y, z - 0.5), (x, y + 0.5, z),
+                                                               (x, y - 0.5, z)]
 
                     if x > 0:
                         if ((v_int[x][y][z] == 1) and (v_crust[x - 1][y][z] == 1)) or (
@@ -393,11 +461,13 @@ def construct_graph(v_crust, distances_grid, v_int, v_ext):
                             vertices_and_edges[(x - 0.5, y, z)].append("sink")
 
                     if (x + 0.5, y, z) in vertices_and_edges.keys():
-                        vertices_and_edges[(x + 0.5, y, z)] += [(x, y, z + 0.5), (x, y, z - 0.5), (x, y + 0.5, z), (x, y - 0.5, z)]
+                        vertices_and_edges[(x + 0.5, y, z)] += [(x, y, z + 0.5), (x, y, z - 0.5), (x, y + 0.5, z),
+                                                                (x, y - 0.5, z)]
                     else:
-                        vertices_and_edges[(x + 0.5, y, z)] = [(x, y, z + 0.5), (x, y, z - 0.5), (x, y + 0.5, z), (x, y - 0.5, z)]
+                        vertices_and_edges[(x + 0.5, y, z)] = [(x, y, z + 0.5), (x, y, z - 0.5), (x, y + 0.5, z),
+                                                               (x, y - 0.5, z)]
 
-                    if x+1 < v_crust.shape[0]:
+                    if x + 1 < v_crust.shape[0]:
                         if ((v_int[x][y][z] == 1) and (v_crust[x + 1][y][z] == 1)) or (
                                 (v_crust[x][y][z] == 1) and (v_int[x + 1][y][z] == 1)):
                             vertices_and_edges["source"].append((x + 0.5, y, z))
@@ -408,62 +478,70 @@ def construct_graph(v_crust, distances_grid, v_int, v_ext):
                             vertices_and_edges[(x + 0.5, y, z)].append("sink")
 
                     if (x, y + 0.5, z) in vertices_and_edges.keys():
-                        vertices_and_edges[(x, y + 0.5, z)] += [(x, y, z + 0.5), (x, y, z - 0.5), (x + 0.5, y, z), (x - 0.5, y, z)]
+                        vertices_and_edges[(x, y + 0.5, z)] += [(x, y, z + 0.5), (x, y, z - 0.5), (x + 0.5, y, z),
+                                                                (x - 0.5, y, z)]
                     else:
-                        vertices_and_edges[(x, y + 0.5, z)] = [(x, y, z + 0.5), (x, y, z - 0.5), (x + 0.5, y, z), (x - 0.5, y, z)]
+                        vertices_and_edges[(x, y + 0.5, z)] = [(x, y, z + 0.5), (x, y, z - 0.5), (x + 0.5, y, z),
+                                                               (x - 0.5, y, z)]
 
-                    if y+1 < v_crust.shape[1]:
-                        if ((v_int[x][y][z] == 1) and (v_crust[x][y+1][z] == 1)) or (
-                                (v_crust[x][y][z] == 1) and (v_int[x][y+1][z] == 1)):
+                    if y + 1 < v_crust.shape[1]:
+                        if ((v_int[x][y][z] == 1) and (v_crust[x][y + 1][z] == 1)) or (
+                                (v_crust[x][y][z] == 1) and (v_int[x][y + 1][z] == 1)):
                             vertices_and_edges["source"].append((x, y + 0.5, z))
                             vertices_and_edges[(x, y + 0.5, z)].append("source")
-                        if ((v_ext[x][y][z] == 1) and (v_crust[x][y+1][z] == 1)) or (
-                                (v_crust[x][y][z] == 1) and (v_ext[x][y+1][z] == 1)):
+                        if ((v_ext[x][y][z] == 1) and (v_crust[x][y + 1][z] == 1)) or (
+                                (v_crust[x][y][z] == 1) and (v_ext[x][y + 1][z] == 1)):
                             vertices_and_edges["sink"].append((x, y + 0.5, z))
                             vertices_and_edges[(x, y + 0.5, z)].append("sink")
 
                     if (x, y - 0.5, z) in vertices_and_edges.keys():
-                        vertices_and_edges[(x, y - 0.5, z)] += [(x, y, z + 0.5), (x, y, z - 0.5), (x + 0.5, y, z), (x - 0.5, y, z)]
+                        vertices_and_edges[(x, y - 0.5, z)] += [(x, y, z + 0.5), (x, y, z - 0.5), (x + 0.5, y, z),
+                                                                (x - 0.5, y, z)]
                     else:
-                        vertices_and_edges[(x, y - 0.5, z)] = [(x, y, z + 0.5), (x, y, z - 0.5), (x + 0.5, y, z), (x - 0.5, y, z)]
+                        vertices_and_edges[(x, y - 0.5, z)] = [(x, y, z + 0.5), (x, y, z - 0.5), (x + 0.5, y, z),
+                                                               (x - 0.5, y, z)]
 
                     if y > 0:
-                        if ((v_int[x][y][z] == 1) and (v_crust[x][y-1][z] == 1)) or (
-                                (v_crust[x][y][z] == 1) and (v_int[x][y-1][z] == 1)):
+                        if ((v_int[x][y][z] == 1) and (v_crust[x][y - 1][z] == 1)) or (
+                                (v_crust[x][y][z] == 1) and (v_int[x][y - 1][z] == 1)):
                             vertices_and_edges["source"].append((x, y - 0.5, z))
                             vertices_and_edges[(x, y - 0.5, z)].append("source")
-                        if ((v_ext[x][y][z] == 1) and (v_crust[x][y-1][z] == 1)) or (
-                                (v_crust[x][y][z] == 1) and (v_ext[x][y-1][z] == 1)):
+                        if ((v_ext[x][y][z] == 1) and (v_crust[x][y - 1][z] == 1)) or (
+                                (v_crust[x][y][z] == 1) and (v_ext[x][y - 1][z] == 1)):
                             vertices_and_edges["sink"].append((x, y - 0.5, z))
                             vertices_and_edges[(x, y - 0.5, z)].append("sink")
 
                     if (x, y, z + 0.5) in vertices_and_edges.keys():
-                        vertices_and_edges[(x, y, z + 0.5)] += [(x, y + 0.5, z), (x, y - 0.5, z), (x + 0.5, y, z), (x - 0.5, y, z)]
+                        vertices_and_edges[(x, y, z + 0.5)] += [(x, y + 0.5, z), (x, y - 0.5, z), (x + 0.5, y, z),
+                                                                (x - 0.5, y, z)]
                     else:
-                        vertices_and_edges[(x, y, z + 0.5)] = [(x, y + 0.5, z), (x, y - 0.5, z), (x + 0.5, y, z), (x - 0.5, y, z)]
+                        vertices_and_edges[(x, y, z + 0.5)] = [(x, y + 0.5, z), (x, y - 0.5, z), (x + 0.5, y, z),
+                                                               (x - 0.5, y, z)]
 
-                    if z+1 < v_crust.shape[2]:
-                        if ((v_int[x][y][z] == 1) and (v_crust[x][y][z+1] == 1)) or (
-                                (v_crust[x][y][z] == 1) and (v_int[x][y][z+1] == 1)):
+                    if z + 1 < v_crust.shape[2]:
+                        if ((v_int[x][y][z] == 1) and (v_crust[x][y][z + 1] == 1)) or (
+                                (v_crust[x][y][z] == 1) and (v_int[x][y][z + 1] == 1)):
                             vertices_and_edges["source"].append((x, y, z + 0.5))
                             vertices_and_edges[(x, y, z + 0.5)].append("source")
-                        if ((v_ext[x][y][z] == 1) and (v_crust[x][y][z+1] == 1)) or (
-                                (v_crust[x][y][z] == 1) and (v_ext[x][y][z+1] == 1)):
+                        if ((v_ext[x][y][z] == 1) and (v_crust[x][y][z + 1] == 1)) or (
+                                (v_crust[x][y][z] == 1) and (v_ext[x][y][z + 1] == 1)):
                             vertices_and_edges["sink"].append((x, y, z + 0.5))
                             vertices_and_edges[(x, y, z + 0.5)].append("sink")
 
                     if (x, y, z - 0.5) in vertices_and_edges.keys():
-                        vertices_and_edges[(x, y, z - 0.5)] += [(x, y + 0.5, z), (x, y - 0.5, z), (x + 0.5, y, z), (x - 0.5, y, z)]
+                        vertices_and_edges[(x, y, z - 0.5)] += [(x, y + 0.5, z), (x, y - 0.5, z), (x + 0.5, y, z),
+                                                                (x - 0.5, y, z)]
                     else:
-                        vertices_and_edges[(x, y, z - 0.5)] = [(x, y + 0.5, z), (x, y - 0.5, z), (x + 0.5, y, z), (x - 0.5, y, z)]
+                        vertices_and_edges[(x, y, z - 0.5)] = [(x, y + 0.5, z), (x, y - 0.5, z), (x + 0.5, y, z),
+                                                               (x - 0.5, y, z)]
 
                     if z > 0:
-                        if ((v_int[x][y][z] == 1) and (v_crust[x][y][z-1] == 1)) or (
-                                (v_crust[x][y][z] == 1) and (v_int[x][y][z-1] == 1)):
+                        if ((v_int[x][y][z] == 1) and (v_crust[x][y][z - 1] == 1)) or (
+                                (v_crust[x][y][z] == 1) and (v_int[x][y][z - 1] == 1)):
                             vertices_and_edges["source"].append((x, y, z - 0.5))
                             vertices_and_edges[(x, y, z - 0.5)].append("source")
-                        if ((v_ext[x][y][z] == 1) and (v_crust[x][y][z-1] == 1)) or (
-                                (v_crust[x][y][z] == 1) and (v_ext[x][y][z-1] == 1)):
+                        if ((v_ext[x][y][z] == 1) and (v_crust[x][y][z - 1] == 1)) or (
+                                (v_crust[x][y][z] == 1) and (v_ext[x][y][z - 1] == 1)):
                             vertices_and_edges["sink"].append((x, y, z - 0.5))
                             vertices_and_edges[(x, y, z - 0.5)].append("sink")
 
@@ -474,15 +552,15 @@ def construct_graph(v_crust, distances_grid, v_int, v_ext):
     print(len((vertices_and_edges["source"])))
     print(len(vertices_and_edges))
 
-    ind = {k: i-1 for i, k in enumerate(vertices_and_edges.keys())}
-    inverse_ind = {i-1: k for i, k in enumerate(vertices_and_edges.keys())}
+    ind = {k: i - 1 for i, k in enumerate(vertices_and_edges.keys())}
+    inverse_ind = {i - 1: k for i, k in enumerate(vertices_and_edges.keys())}
     ind["source"] = 0
-    ind["sink"] = len(vertices_and_edges)-1
+    ind["sink"] = len(vertices_and_edges) - 1
 
     inverse_ind[0] = "source"
-    inverse_ind[len(vertices_and_edges)-1] = "sink"
+    inverse_ind[len(vertices_and_edges) - 1] = "sink"
 
-    graph = numpy.zeros((len(vertices_and_edges),len(vertices_and_edges)))
+    graph = numpy.zeros((len(vertices_and_edges), len(vertices_and_edges)))
 
     for sommet, aretes in vertices_and_edges.items():
         for sommet2 in aretes:
@@ -495,12 +573,68 @@ def construct_graph(v_crust, distances_grid, v_int, v_ext):
 
 
 def get_cut_edges(cut_edges, graph_dict, inverse_index):
-    resultat = []
+    resultat = {}
     for arc in cut_edges:
-        print(arc[0])
-        print(arc[1])
-        resultat.append((inverse_index[arc[0]], inverse_index[arc[1]]))
-    return resultat
+        if (inverse_index[arc[0]] != "source") and (inverse_index[arc[0]] != "sink") and (
+                inverse_index[arc[1]] != "source") and (inverse_index[arc[1]] != "sink"):
+            x, y, z = inverse_index[arc[0]]
+            x2, y2, z2 = inverse_index[arc[1]]
+            voxel_x = max(math.floor(x), math.floor(x2))
+            voxel_y = max(math.floor(y), math.floor(y2))
+            voxel_z = max(math.floor(z), math.floor(z2))
+            if (voxel_x, voxel_y, voxel_z) not in resultat.keys():
+                resultat[(voxel_x, voxel_y, voxel_z)] = [(((inverse_index[arc[0]][0] - voxel_x),
+                                                          (inverse_index[arc[0]][1] - voxel_y),
+                                                          (inverse_index[arc[0]][2] - voxel_z)), (
+                                                         (inverse_index[arc[1]][0] - voxel_x),
+                                                         (inverse_index[arc[1]][1] - voxel_y),
+                                                         (inverse_index[arc[1]][2] - voxel_z)))]
+            else:
+                resultat[(voxel_x, voxel_y, voxel_z)].append((((inverse_index[arc[0]][0] - voxel_x),
+                                                              (inverse_index[arc[0]][1] - voxel_y),
+                                                              (inverse_index[arc[0]][2] - voxel_z)), (
+                                                             (inverse_index[arc[1]][0] - voxel_x),
+                                                             (inverse_index[arc[1]][1] - voxel_y),
+                                                             (inverse_index[arc[1]][2] - voxel_z))))
+
+    res = {}
+
+    for voxel in resultat.keys():
+        for edge in resultat[voxel]:
+            new_edge = None
+            if (edge == ((0, -0.5, 0), (0, 0, -0.5))) or (edge == ((0, 0, -0.5), (0, -0.5, 0))):
+                new_edge = ((0,0,0), (1,0,0))
+            if (edge == ((0, 0, -0.5), (0.5, 0, 0))) or (edge == ((0.5, 0, 0), (0, 0, -0.5))):
+                new_edge = ((1, 0, 0), (1, 1, 0))
+            if (edge == ((0, 0, -0.5), (0, 0.5, 0))) or (edge == ((0, 0.5, 0), (0, 0, -0.5))):
+                new_edge = ((1, 1, 0), (0, 1, 0))
+            if (edge == ((0, 0, -0.5), (-0.5, 0, 0))) or (edge == ((-0.5, 0, 0), (0, 0, -0.5))):
+                new_edge = ((0, 1, 0), (0,0, 0))
+            if (edge == ((0, -0.5, 0), (0, 0, 0.5))) or (edge == ((0, 0, 0.5), (0, -0.5, 0))):
+                new_edge = ((0, 0, 1), (1, 0, 1))
+            if (edge == ((0, 0, 0.5), (0.5, 0, 0))) or (edge == ((0.5, 0, 0), (0, 0, 0.5))):
+                new_edge = ((1, 0, 1), (1, 1, 1))
+            if (edge == ((0, 0, 0.5), (0, 0.5, 0))) or (edge == ((0, 0.5, 0), (0, 0, 0.5))):
+                new_edge = ((1, 1, 1), (0, 1, 1))
+            if (edge == ((0, 0, 0.5), (-0.5, 0, 0))) or (edge == ((-0.5, 0, 0), (0, 0, 0.5))):
+                new_edge = ((0, 1, 1), (0, 0, 1))
+
+            if (edge == ((0, -0.5, 0), (-0.5, 0, 0))) or (edge == ((-0.5, 0, 0), (0, -0.5, 0))):
+                new_edge = ((0, 0, 0), (0, 0, 1))
+            if (edge == ((0, -0.5, 0), (0.5, 0, 0))) or (edge == ((0.5, 0, 0), (0, -0.5, 0))):
+                new_edge = ((1, 0, 0), (1, 0, 1))
+            if (edge == ((0.5, 0, 0), (0, 0.5, 0))) or (edge == ((0, 0.5, 0), (0.5, 0, 0))):
+                new_edge = ((1, 1, 0), (1, 1, 1))
+            if (edge == ((0, 0.5, 0), (-0.5, 0, 0))) or (edge == ((-0.5, 0, 0), (0, 0.5, 0))):
+                new_edge = ((0, 1, 0), (0, 1, 1))
+
+            if voxel not in res.keys():
+                res[voxel] = [new_edge]
+            else:
+                res[voxel].append(new_edge)
+
+    return res
+
 
 dim_x = 10
 dim_y = 10
@@ -508,6 +642,8 @@ dim_z = 10
 
 
 def main():
+
+
     off_file = open("dragon.OFF", "r")
     vertices = read_off(off_file)
 
@@ -519,7 +655,6 @@ def main():
     # voxels_grid = dilate_voxels_grid(voxels_grid)
 
     filled_voxels_grid = flood_fill(voxels_grid, 0, 0, 0, 0, 2)
-
 
     # ax.voxels(filled_voxels_grid[:][:][0:8], facecolors=color_voxels_grid(filled_voxels_grid)[:][:][0:8], edgecolor="k")
 
@@ -555,10 +690,12 @@ def main():
     g = Graph(graph)
 
     source = 0
-    sink = len(graph)-1
+    sink = len(graph) - 1
 
     cut_edges = g.minCut(source, sink)
     cut_edges = get_cut_edges(cut_edges, graph_dictionnary, inverse_index)
+
+    construct_mesh(cut_edges)
 
     print("cut-edges", cut_edges)
 
@@ -571,7 +708,7 @@ def main():
     # print("v_ext", v_ext)
 
     colors = color_voxels_grid(filled_voxels_grid[:][:][:])
-    #print(colors)
+    # print(colors)
 
     # fig = plt.figure()
     # ax = fig.gca(projection='3d')
@@ -582,17 +719,13 @@ def main():
 
     # plt.ion()
 
-
     plt.figure(1)
     # plt.imshow(v_ext[:][:][70], cmap='gray', interpolation='none')
 
     plt.figure(2)
     # plt.imshow(v_int[:][:][70], cmap='gray', interpolation='none')
 
-
     plt.show()
 
 
 main()
-
-
