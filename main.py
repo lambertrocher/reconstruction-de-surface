@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import sys
 import math
 from collections import defaultdict
-
+import re
 
 # This class represents a directed graph using adjacency matrix representation
 class Graph:
@@ -105,8 +105,9 @@ class Graph:
 def read_off(file):
     if 'OFF' != file.readline().strip():
         print('Header OFF invalide')
-    n_vertices, n_faces, _ = [int(s) for s in file.readline().strip().split(' ')]
-    vertices = [[float(s) for s in file.readline().strip().split(' ')] for i_vertex in range(n_vertices)]
+
+    n_vertices, n_faces, _ = [int(s) for s in re.sub(' +', ' ', file.readline().strip()).split(' ')]
+    vertices = [[float(s) for s in  re.sub(' +', ' ', file.readline().strip()).split(' ')] for i_vertex in range(n_vertices)]
     # faces = [[int(s) for s in file.readline().strip().split(' ')][1:] for i_face in range(n_faces)]
     print("nombre de points : ", n_vertices)
     # print(vertices)
@@ -356,6 +357,9 @@ def construct_mesh(cut_edges):
         s_opt[voxel[0]][voxel[1]][voxel[2]] = 1
     print("s_opt", s_opt)
 
+    vertex = []
+    faces = []
+
     for x in range(dim_x - 1):
         for y in range(dim_y - 1):
             for z in range(dim_z - 1):
@@ -363,43 +367,61 @@ def construct_mesh(cut_edges):
                 n_voxels_in_s_opt = s_opt[x][y][z] + s_opt[x + 1][y][z] + s_opt[x][y + 1][z] + \
                                     s_opt[x + 1][y + 1][z] + s_opt[x][y][z + 1] + s_opt[x + 1][y][z + 1] + \
                                     s_opt[x][y + 1][z + 1] + s_opt[x + 1][y + 1][z + 1]
+
+                print(n_voxels_in_s_opt)
                 if n_voxels_in_s_opt >= 3:
-                    b_cut_edges = {}
+                    print("plus de 3")
+                    # b_cut_edges = {}
+                    #
+                    # if (x,y,z) in cut_edges.keys():
+                    #     b_cut_edges[(0,0,0)] = offset_cut_edges(cut_edges[(x, y, z)],[0,0,0])
+                    # if (x+1, y, z) in cut_edges.keys():
+                    #     b_cut_edges[(1, 0, 0)] = offset_cut_edges(cut_edges[(x+1, y, z)],[1,0,0])
+                    # if (x, y+1, z) in cut_edges.keys():
+                    #     b_cut_edges[(0, 1, 0)] = offset_cut_edges(cut_edges[(x, y+1, z)],[0,1,0])
+                    # if (x+1, y+1, z) in cut_edges.keys():
+                    #     b_cut_edges[(1, 1, 0)] = offset_cut_edges(cut_edges[(x+1, y+1, z)],[1,1,0])
+                    # if (x, y, z+1) in cut_edges.keys():
+                    #     b_cut_edges[(0, 0, 1)] = offset_cut_edges(cut_edges[(x, y, z+1)],[0,0,1])
+                    # if (x+1, y, z+1) in cut_edges.keys():
+                    #     b_cut_edges[(1, 0, 1)] = offset_cut_edges(cut_edges[(x+1, y, z+1)],[1,0,1])
+                    # if (x, y+1, z+1) in cut_edges.keys():
+                    #     b_cut_edges[(0, 1, 1)] = offset_cut_edges(cut_edges[(x, y+1, z+1)],[0,1,1])
+                    # if (x+1, y+1, z+1) in cut_edges.keys():
+                    #     b_cut_edges[(1, 1, 1)] = offset_cut_edges(cut_edges[(x+1, y+1, z+1)],[1,1,1])
 
-                    if (x,y,z) in cut_edges.keys():
-                        b_cut_edges[(0,0,0)] = offset_cut_edges(cut_edges[(x, y, z)],[0,0,0])
-                    if (x+1, y, z) in cut_edges.keys():
-                        b_cut_edges[(1, 0, 0)] = offset_cut_edges(cut_edges[(x+1, y, z)],[1,0,0])
-                    if (x, y+1, z) in cut_edges.keys():
-                        b_cut_edges[(0, 1, 0)] = offset_cut_edges(cut_edges[(x, y+1, z)],[0,1,0])
-                    if (x+1, y+1, z) in cut_edges.keys():
-                        b_cut_edges[(1, 1, 0)] = offset_cut_edges(cut_edges[(x+1, y+1, z)],[1,1,0])
-                    if (x, y, z+1) in cut_edges.keys():
-                        b_cut_edges[(0, 0, 1)] = offset_cut_edges(cut_edges[(x, y, z+1)],[0,0,1])
-                    if (x+1, y, z+1) in cut_edges.keys():
-                        b_cut_edges[(1, 0, 1)] = offset_cut_edges(cut_edges[(x+1, y, z+1)],[1,0,1])
-                    if (x, y+1, z+1) in cut_edges.keys():
-                        b_cut_edges[(0, 1, 1)] = offset_cut_edges(cut_edges[(x, y+1, z+1)],[0,1,1])
-                    if (x+1, y+1, z+1) in cut_edges.keys():
-                        b_cut_edges[(1, 1, 1)] = offset_cut_edges(cut_edges[(x+1, y+1, z+1)],[1,1,1])
 
-                    vertex = []
+                    nouveaux_sommets = []
                     if s_opt[x][y][z] == 1:
                         vertex.append((x, y, z))
-                    elif s_opt[x + 1][y][z] == 1:
+                        nouveaux_sommets.append((x, y, z))
+                    if s_opt[x + 1][y][z] == 1:
                         vertex.append((x + 1, y, z))
-                    elif s_opt[x][y + 1][z] == 1:
+                        nouveaux_sommets.append((x + 1, y, z))
+                    if s_opt[x][y + 1][z] == 1:
                         vertex.append((x, y + 1, z))
-                    elif s_opt[x + 1][y + 1][z] == 1:
+                        nouveaux_sommets.append((x, y + 1, z))
+                    if s_opt[x + 1][y + 1][z] == 1:
                         vertex.append((x + 1, y + 1, z))
-                    elif s_opt[x][y][z + 1] == 1:
+                        nouveaux_sommets.append((x + 1, y + 1, z))
+                    if s_opt[x][y][z + 1] == 1:
                         vertex.append((x, y, z + 1))
-                    elif s_opt[x + 1][y][z + 1] == 1:
+                        nouveaux_sommets.append((x, y, z + 1))
+                    if s_opt[x + 1][y][z + 1] == 1:
                         vertex.append((x + 1, y, z + 1))
-                    elif s_opt[x][y + 1][z + 1] == 1:
+                        nouveaux_sommets.append((x + 1, y, z + 1))
+                    if s_opt[x][y + 1][z + 1] == 1:
                         vertex.append((x, y + 1, z + 1))
-                    elif s_opt[x + 1][y + 1][z + 1] == 1:
+                        nouveaux_sommets.append((x, y + 1, z + 1))
+                    if s_opt[x + 1][y + 1][z + 1] == 1:
                         vertex.append((x + 1, y + 1, z + 1))
+                        nouveaux_sommets.append((x + 1, y + 1, z + 1))
+
+                    # print("nouv sommets", nouveaux_sommets)
+                    # print((vertex.index(nouveaux_sommets[0]), vertex.index(nouveaux_sommets[1]), vertex.index(nouveaux_sommets[2])))
+
+                    face = (vertex.index(nouveaux_sommets[0]), vertex.index(nouveaux_sommets[1]), vertex.index(nouveaux_sommets[2]))
+                    faces.append(face)
 
                     # print(b_cut_edges)
 
@@ -417,6 +439,10 @@ def construct_mesh(cut_edges):
                     #         if cut_edge[0] == (1, 1, 1) or cut_edge[1] == (1, 1, 1) and cut_edge != e:
                     #             f = cut_edge
                     #     print("f", f)
+
+    print("resultat", vertex, faces)
+
+    return vertex, faces
 
 
 def find_weight(sommet1, sommet2, distances_grid):
@@ -636,21 +662,36 @@ def get_cut_edges(cut_edges, graph_dict, inverse_index):
     return res
 
 
-dim_x = 10
-dim_y = 10
-dim_z = 10
+def write_off(vertex, faces):
+    fichier = open("resultat.off", "a")
+    fichier.write("OFF \n")
+    fichier.write(str(len(vertex)) + " " + str(len(faces)) + " 0" + "\n")
+    # fichier.write(str(len(faces)) + "\n")
+
+    for sommet in vertex:
+        fichier.write(str(sommet[0]) + " " +str(sommet[1]) + " " +str(sommet[2]) + "\n")
+
+    for face in faces:
+        fichier.write("3 " + str(face[0]) + " " +str(face[1]) + " " +str(face[2]) + "\n")
+
+    fichier.close()
+
+
+dim_x = 100
+dim_y = 100
+dim_z = 100
 
 
 def main():
 
 
-    off_file = open("dragon.OFF", "r")
+    off_file = open("happy.off", "r")
     vertices = read_off(off_file)
 
     voxels_grid = init_voxels_grid(vertices)
 
-    # voxels_grid = dilate_voxels_grid(voxels_grid)
-    # voxels_grid = dilate_voxels_grid(voxels_grid)
+    dilated = dilate_voxels_grid(voxels_grid)
+    dilated = dilate_voxels_grid(dilated)
     # voxels_grid = dilate_voxels_grid(voxels_grid)
     # voxels_grid = dilate_voxels_grid(voxels_grid)
 
@@ -678,7 +719,7 @@ def main():
 
     distances_grid = get_distances_grid(voxels_grid, v_crust)
 
-    graph, graph_dictionnary, inverse_index = construct_graph(v_crust, distances_grid, v_int, v_ext)
+    # graph, graph_dictionnary, inverse_index = construct_graph(v_crust, distances_grid, v_int, v_ext)
 
     # graph = [[0, 16, 13, 0, 0, 0],
     #          [0, 0, 10, 12, 0, 0],
@@ -687,17 +728,19 @@ def main():
     #          [0, 0, 0, 7, 0, 4],
     #          [0, 0, 0, 0, 0, 0]]
 
-    g = Graph(graph)
+    # g = Graph(graph)
 
-    source = 0
-    sink = len(graph) - 1
+    # source = 0
+    # sink = len(graph) - 1
 
-    cut_edges = g.minCut(source, sink)
-    cut_edges = get_cut_edges(cut_edges, graph_dictionnary, inverse_index)
+    # cut_edges = g.minCut(source, sink)
+    # cut_edges = get_cut_edges(cut_edges, graph_dictionnary, inverse_index)
 
-    construct_mesh(cut_edges)
-
-    print("cut-edges", cut_edges)
+    # vertex, faces = construct_mesh(cut_edges)
+    # print("faces", faces)
+    # write_off(vertex, faces)
+    #
+    # print("cut-edges", cut_edges)
 
     # parent = [-1]*len(graph)
     # res = g.BFS(source, sink, parent)
@@ -710,20 +753,72 @@ def main():
     colors = color_voxels_grid(filled_voxels_grid[:][:][:])
     # print(colors)
 
-    # fig = plt.figure()
+    # fig = plt.figure(0)
     # ax = fig.gca(projection='3d')
     # ax.set_aspect('equal')
     # # ax.voxels(filled_voxels_grid[:][:][:], facecolors=colors)
     # ax.voxels(v_ext, edgecolor="k")
     # plt.show()
-
+    #
     # plt.ion()
 
+    # for i in range(20):
+    #     plt.figure(i)
+    #     plt.imshow(v_crust[:][:][i], cmap='Greys', interpolation='none')
+
     plt.figure(1)
-    # plt.imshow(v_ext[:][:][70], cmap='gray', interpolation='none')
+    plt.imshow(v_ext[:][:][40], cmap='Greys', interpolation='none')
 
     plt.figure(2)
-    # plt.imshow(v_int[:][:][70], cmap='gray', interpolation='none')
+    plt.imshow(v_int[:][:][40], cmap='Greys', interpolation='none')
+
+    plt.figure(3)
+    plt.imshow(v_crust[:][:][40], cmap='Greys', interpolation='none')
+
+    plt.figure(4)
+    plt.imshow(filled_voxels_grid[:][:][40], cmap='plasma', interpolation='none')
+
+    voxels_grid = dilate_voxels_grid(voxels_grid)
+    voxels_grid = dilate_voxels_grid(voxels_grid)
+    # voxels_grid = dilate_voxels_grid(voxels_grid)
+    # voxels_grid = dilate_voxels_grid(voxels_grid)
+
+    filled_voxels_grid = flood_fill(voxels_grid, 0, 0, 0, 0, 2)
+
+    # ax.voxels(filled_voxels_grid[:][:][0:8], facecolors=color_voxels_grid(filled_voxels_grid)[:][:][0:8], edgecolor="k")
+
+    v_int = get_v_int(filled_voxels_grid)
+    # print("v_int", v_int)
+
+    v_ext = get_v_ext(filled_voxels_grid)
+    # print("v_ext", v_ext)
+
+    for x in range(filled_voxels_grid.shape[0]):
+        for y in range(filled_voxels_grid.shape[1]):
+            for z in range(filled_voxels_grid.shape[2]):
+                if filled_voxels_grid[x][y][z] == 2:
+                    filled_voxels_grid[x][y][z] = 2
+                elif filled_voxels_grid[x][y][z] == 1:
+                    filled_voxels_grid[x][y][z] = 1
+                elif filled_voxels_grid[x][y][z] == 0:
+                    filled_voxels_grid[x][y][z] = 10
+
+    v_crust = voxels_grid.copy()
+
+    distances_grid = get_distances_grid(voxels_grid, v_crust)
+
+
+    plt.figure(5)
+    plt.imshow(v_ext[:][:][40], cmap='Greys', interpolation='none')
+
+    plt.figure(6)
+    plt.imshow(v_int[:][:][40], cmap='Greys', interpolation='none')
+
+    plt.figure(7)
+    plt.imshow(v_crust[:][:][40], cmap='Greys', interpolation='none')
+
+    plt.figure(8)
+    plt.imshow(filled_voxels_grid[:][:][40], cmap='plasma', interpolation='none')
 
     plt.show()
 
